@@ -1,4 +1,0 @@
-LIBRARY spyxxhk.dll
-EXPORTS
-InitHookProc	
-EndHook			

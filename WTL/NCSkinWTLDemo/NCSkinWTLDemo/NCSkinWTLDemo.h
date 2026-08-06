@@ -1,1 +1,0 @@
-// NCSkinWTLDemo.h

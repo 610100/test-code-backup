@@ -1,8 +1,0 @@
-
-LIBRARY      "com_lean4PS"
-
-EXPORTS
-	DllGetClassObject		PRIVATE
-	DllCanUnloadNow			PRIVATE
-	DllRegisterServer		PRIVATE
-	DllUnregisterServer		PRIVATE
