@@ -22,8 +22,8 @@ if (-not (Test-Path -LiteralPath $coreScript -PathType Leaf)) {
 # UpdateDatabase wrapper. Generate a same-directory temporary script so that
 # $PSScriptRoot still points to this integration pack's Files directory.
 $text = [IO.File]::ReadAllText($coreScript)
-$oldPattern = 'DataBaseHelper\\s*\\.\\s*CheckTable\\s*\\('
-$newPattern = 'DataBaseHelper\\s*\\.\\s*(?:CheckTable|UpdateDatabase)\\s*\\('
+$oldPattern = 'DataBaseHelper\s*\.\s*CheckTable\s*\('
+$newPattern = 'DataBaseHelper\s*\.\s*(?:CheckTable|UpdateDatabase)\s*\('
 
 if ($text.IndexOf($oldPattern, [StringComparison]::Ordinal) -ge 0) {
     $text = $text.Replace($oldPattern, $newPattern)
