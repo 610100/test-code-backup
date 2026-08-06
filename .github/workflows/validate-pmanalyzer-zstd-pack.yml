@@ -1,0 +1,62 @@
+name: Validate temporary PMAnalyzer Zstd integration pack
+
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse PowerShell script
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            "_deliverables/pmanalyzer-zstd-integration/Integrate-PMAnalyzer-Zstd.ps1",
+            [ref]$tokens,
+            [ref]$errors)
+          if ($errors.Count -ne 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+
+      - name: Validate integration sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="_deliverables/pmanalyzer-zstd-integration"
+          test -s "$root/Integrate-PMAnalyzer-Zstd.ps1"
+          test -s "$root/Files/SpectrumDataCompression.cs"
+          test -s "$root/Files/SpectrumDataUpgradeForm.cs"
+          grep -q "SPZSTD01" "$root/Files/SpectrumDataCompression.cs"
+          grep -q "SpectrumCompressionDictionary" "$root/Files/SpectrumDataCompression.cs"
+          grep -q "NeedsDatabaseUpgrade" "$root/Files/SpectrumDataCompression.cs"
+          grep -q "数据库正在升级" "$root/Files/SpectrumDataUpgradeForm.cs"
+          grep -q "ZSTD-SPECTRUM-HOOK" "$root/Integrate-PMAnalyzer-Zstd.ps1"
+          grep -q "ZSTD-SPECTRUM-UPGRADE" "$root/Integrate-PMAnalyzer-Zstd.ps1"
+
+      - name: Create ZIP and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd _deliverables/pmanalyzer-zstd-integration
+          zip -9 -r "$GITHUB_WORKSPACE/PMAnalyzer_Zstd_Integration_Pack.zip" .
+          cd "$GITHUB_WORKSPACE"
+          sha256sum PMAnalyzer_Zstd_Integration_Pack.zip > PMAnalyzer_Zstd_Integration_Pack.zip.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PMAnalyzer_Zstd_Integration_Pack
+          path: |
+            PMAnalyzer_Zstd_Integration_Pack.zip
+            PMAnalyzer_Zstd_Integration_Pack.zip.sha256
+          if-no-files-found: error
+          retention-days: 1
